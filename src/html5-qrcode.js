@@ -1,4 +1,24 @@
 (function($) {
+    navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+    $.EnumCameraOptions = function(gotSources)
+    {
+        if (typeof MediaStreamTrack === 'undefined' ||
+            typeof MediaStreamTrack.getSources === 'undefined') {
+            throw 'This browser does not support MediaStreamTrack.\n\nTry Chrome.';
+        } else {
+            MediaStreamTrack.getSources(function(infos){
+                gotSources(infos
+                    .filter(function(info){return info.kind == 'video';})
+                    .map(function(info){
+                        return {id: info.id, name: info.label || 'camera ' + i};
+                    })
+                );
+            });
+        }
+    };
+
     jQuery.fn.extend({
         html5_qrcode: function(qrcodeSuccess, qrcodeError, videoError) {
             return this.each(function() {
@@ -41,7 +61,6 @@
                 };//end snapshot function
 
                 window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
-                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
                 var successCallback = function(stream) {
                     video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
